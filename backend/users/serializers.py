@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
+from djoser.serializers import TokenCreateSerializer
 
 from users.models import Subscription
 from recipes.models import Recipe
@@ -60,3 +61,10 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('avatar',)
+
+
+class CustomTokenCreateSerializer(TokenCreateSerializer):
+    def to_representation(self, instance):
+        print("CustomTokenCreateSerializer is being used.")
+        return {'token': instance.key}
+
