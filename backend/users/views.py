@@ -2,7 +2,6 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from djoser.views import TokenCreateView
 
 from users.models import CustomUser, Subscription
 from users.serializers import UserSerializer, SubscriptionSerializer, AvatarSerializer, CustomTokenCreateSerializer
@@ -69,7 +68,3 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         user.avatar.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class CustomTokenCreateView(TokenCreateView):
-    serializer_class = CustomTokenCreateSerializer

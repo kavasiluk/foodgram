@@ -4,7 +4,6 @@ from drf_extra_fields.fields import Base64ImageField
 from djoser.serializers import TokenCreateSerializer
 
 from users.models import Subscription
-from recipes.models import Recipe
 from recipes.short_serializers import RecipeShortSerializer
 
 
@@ -13,12 +12,14 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
+    avatar = Base64ImageField(required=False,
+                              allow_null=True)
 
     class Meta:
         model = User
         fields = (
             'id', 'email', 'username', 'first_name',
-            'last_name', 'is_subscribed'
+            'last_name', 'is_subscribed', 'avatar'
         )
 
     def get_is_subscribed(self, obj):

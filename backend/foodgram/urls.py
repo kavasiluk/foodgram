@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from recipes.views import RecipeViewSet, IngredientViewSet, TagViewSet
-from users.views import UserViewSet, CustomTokenCreateView
+from users.views import UserViewSet
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -17,7 +17,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
 
-    path('api/auth/token/login/', CustomTokenCreateView.as_view(), name='custom_token_create'),
+    path('api/auth/', include('djoser.urls.authtoken')),
     path('api/auth/', include('djoser.urls')),
 ]
 
