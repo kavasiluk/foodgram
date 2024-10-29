@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
-from djoser.serializers import TokenCreateSerializer
 
 from users.models import Subscription
 from recipes.short_serializers import RecipeShortSerializer
@@ -12,20 +11,35 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
-    avatar = Base64ImageField(required=False,
-                              allow_null=True)
+    avatar = Base64ImageField(required=False, allow_null=True)
+    password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
         fields = (
             'id', 'email', 'username', 'first_name',
-            'last_name', 'is_subscribed', 'avatar'
+            'last_name', 'password', 'is_subscribed', 'avatar'
         )
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        print(validated_data)
+        password = validated_data.pop('password')
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            **validated_data
+        )
+        user.set_password(password)
+        user.save()
+        return user
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        if user.is_authenticated:
-            return Subscription.objects.filter(user=user, author=obj).exists()
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return Subscription.objects.filter(user=request.user, author=obj).exists()
         return False
 
 
@@ -62,10 +76,4 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('avatar',)
-
-
-class CustomTokenCreateSerializer(TokenCreateSerializer):
-    def to_representation(self, instance):
-        print("CustomTokenCreateSerializer is being used.")
-        return {'token': instance.key}
 

@@ -1,17 +1,24 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from djoser.views import UserViewSet as DjoserUserViewSet
+
 
 from users.models import CustomUser, Subscription
-from users.serializers import UserSerializer, SubscriptionSerializer, AvatarSerializer, CustomTokenCreateSerializer
+from users.serializers import UserSerializer, SubscriptionSerializer, AvatarSerializer
 from recipes.permissions import IsAdminOrSelf
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(DjoserUserViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminOrSelf]
+
+    def get_permissions(self):
+        if self.action == 'me':
+            return [IsAuthenticated(),]
+        return super().get_permissions()
 
     def perform_update(self, serializer):
         serializer.save()
@@ -22,7 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-    def subscribe(self, request, pk=None):
+    def subscribe(self, request):
         author = self.get_object()
         user = request.user
         if user == author:
@@ -34,7 +41,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
-    def unsubscribe(self, request, pk=None):
+    def unsubscribe(self, request):
         author = self.get_object()
         user = request.user
         subscription = Subscription.objects.filter(user=user, author=author)
