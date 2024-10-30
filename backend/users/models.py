@@ -15,15 +15,28 @@ class CustomUser(AbstractUser):
         null=True
     )
 
+    first_name = models.CharField(
+        'first name',
+        max_length=150,
+        blank=False
+    )
+
+    last_name = models.CharField(
+        'last name',
+        max_length=150,
+        blank=False
+    )
+
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
     USERNAME_FIELD = 'email'
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
 
     def __str__(self):
-        return self.email
+        return self.username
 
 
 class Subscription(models.Model):

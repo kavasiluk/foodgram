@@ -7,6 +7,8 @@ from users.views import UserViewSet
 from django.conf import settings
 from django.conf.urls.static import static
 
+app_name = 'users'
+
 router = DefaultRouter()
 router.register(r'recipes', RecipeViewSet, basename='recipes')
 router.register(r'ingredients', IngredientViewSet, basename='ingredients')

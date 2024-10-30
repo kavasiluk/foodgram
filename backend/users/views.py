@@ -7,17 +7,19 @@ from djoser.views import UserViewSet as DjoserUserViewSet
 
 
 from users.models import CustomUser, Subscription
-from users.serializers import UserSerializer, SubscriptionSerializer, AvatarSerializer
+from users.serializers import UserSerializer, SubscriptionSerializer
+from foodgram.pagination import CustomPagination
 from recipes.permissions import IsAdminOrSelf
 
 
 class UserViewSet(DjoserUserViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    pagination_class = CustomPagination
 
     def get_permissions(self):
         if self.action == 'me':
-            return [IsAuthenticated(),]
+            return (IsAuthenticated(),)
         return super().get_permissions()
 
     def perform_update(self, serializer):
@@ -61,10 +63,10 @@ class UserViewSet(DjoserUserViewSet):
         serializer = SubscriptionSerializer(result_page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['put'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated], url_path='me/avatar')
     def avatar(self, request):
         user = request.user
-        serializer = AvatarSerializer(user, data=request.data, partial=True)
+        serializer = self.get_serializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -74,4 +76,5 @@ class UserViewSet(DjoserUserViewSet):
     def delete_avatar(self, request):
         user = request.user
         user.avatar.delete()
+        user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

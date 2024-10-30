@@ -18,13 +18,14 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'email', 'username', 'first_name',
-            'last_name', 'password', 'is_subscribed', 'avatar'
+            'last_name', 'password', 'is_subscribed', 'avatar',
         )
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         print(validated_data)
         password = validated_data.pop('password')
+        avatar = validated_data.pop('avatar', None)
         user = User(
             email=validated_data['email'],
             username=validated_data['username'],
@@ -33,8 +34,19 @@ class UserSerializer(serializers.ModelSerializer):
             **validated_data
         )
         user.set_password(password)
+        if avatar:
+            user.avatar = avatar
         user.save()
         return user
+
+    def update(self, instance, validated_data):
+        avatar = validated_data.pop('avatar', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if avatar:
+            instance.avatar = avatar
+        instance.save()
+        return instance
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
@@ -55,7 +67,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'email', 'username', 'first_name',
-            'last_name', 'is_subscribed', 'recipes', 'recipes_count'
+            'last_name', 'is_subscribed', 'recipes', 'recipes_count', 'avatar'
         )
 
     def get_is_subscribed(self, obj):
@@ -70,10 +82,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return representation
 
 
-class AvatarSerializer(serializers.ModelSerializer):
+'''class AvatarSerializer(serializers.ModelSerializer):
     avatar = Base64ImageField()
 
     class Meta:
         model = User
         fields = ('avatar',)
 
+'''

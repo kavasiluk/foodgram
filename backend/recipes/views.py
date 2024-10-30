@@ -12,11 +12,13 @@ from recipes.serializers import RecipeSerializer, IngredientSerializer, TagSeria
 from recipes.short_serializers import RecipeShortSerializer
 from recipes.permissions import IsAuthorOrReadOnly
 from recipes.filters import RecipeFilter
+from foodgram.pagination import CustomPagination
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
     permission_classes = [IsAuthorOrReadOnly]
