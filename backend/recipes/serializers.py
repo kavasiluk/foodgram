@@ -14,7 +14,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'color', 'slug')
+        fields = ('id', 'name', 'slug') #'color',
 
 
 class AmountSerializer(serializers.ModelSerializer):
@@ -42,7 +42,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-    image = serializers.ImageField(required=True)
 
     class Meta:
         model = Recipe

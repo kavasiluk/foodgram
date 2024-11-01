@@ -7,7 +7,7 @@ from djoser.views import UserViewSet as DjoserUserViewSet
 
 
 from users.models import CustomUser, Subscription
-from users.serializers import UserSerializer, SubscriptionSerializer
+from users.serializers import UserSerializer, SubscriptionSerializer, AvatarSerializer
 from foodgram.pagination import CustomPagination
 from recipes.permissions import IsAdminOrSelf
 
@@ -66,10 +66,10 @@ class UserViewSet(DjoserUserViewSet):
     @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated], url_path='me/avatar')
     def avatar(self, request):
         user = request.user
-        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer = AvatarSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @avatar.mapping.delete

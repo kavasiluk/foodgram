@@ -11,17 +11,19 @@ from recipes.models import Recipe, Ingredient, Tag, Favorite, ShoppingCart
 from recipes.serializers import RecipeSerializer, IngredientSerializer, TagSerializer
 from recipes.short_serializers import RecipeShortSerializer
 from recipes.permissions import IsAuthorOrReadOnly
-from recipes.filters import RecipeFilter
+from recipes.filters import IngredientFilter, RecipeFilter
 from foodgram.pagination import CustomPagination
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().select_related('author').prefetch_related(
+        'tags', 'ingredients')
     serializer_class = RecipeSerializer
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
     permission_classes = [IsAuthorOrReadOnly]
+
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -84,10 +86,14 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [permissions.AllowAny]
+    pagination_class = None
+
+    filter_backends = (IngredientFilter, )
     search_fields = ['^name']
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
     permission_classes = [permissions.AllowAny]

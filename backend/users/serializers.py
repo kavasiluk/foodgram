@@ -82,11 +82,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return representation
 
 
-'''class AvatarSerializer(serializers.ModelSerializer):
-    avatar = Base64ImageField()
+class AvatarSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField(required=True)
 
     class Meta:
         model = User
         fields = ('avatar',)
 
-'''

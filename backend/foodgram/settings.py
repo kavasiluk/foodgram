@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'recipes',
     'users',
     'corsheaders',
+    'django_filters',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -116,6 +117,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
@@ -127,7 +129,7 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'djoser.serializers.UserCreateSerializer',
         'user': 'users.serializers.UserSerializer',
-        'current_user': 'djoser.serializers.UserSerializer',
+        'current_user': 'users.serializers.UserSerializer',
         'user_list': 'djoser.serializers.UserSerializer',
     },
     'PERMISSIONS': {

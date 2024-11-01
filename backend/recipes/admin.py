@@ -9,5 +9,5 @@ admin.site.register(Amount)
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'cooking_time')
-    search_fields = ('name', 'author__username', 'tags__name')
-    list_filter = ('tags',)
+    search_fields = ('name', 'author', 'tags')
+    list_filter = ('name', 'author', 'tags')
