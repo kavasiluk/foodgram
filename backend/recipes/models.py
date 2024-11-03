@@ -99,36 +99,6 @@ class Recipe(models.Model):
         return self.name
 
 
-'''class IngredientToRecipe(models.Model):
-
-    ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиент',
-    )
-    recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, verbose_name='Рецепт',
-        related_name='ingredient_to_recipe'
-    )
-
-    amount = models.PositiveSmallIntegerField(
-        validators=(
-            1,
-            32767
-        ),
-        verbose_name='Количество ингредиента',
-        default=1
-    )
-
-    class Meta:
-
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
-
-    def __str__(self):
-        return f'{self.ingredient}'
-        '''
-
-
-
 class Amount(models.Model):
     recipe = models.ForeignKey(
         Recipe,

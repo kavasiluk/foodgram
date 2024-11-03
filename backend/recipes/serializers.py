@@ -104,3 +104,31 @@ class RecipeSerializer(serializers.ModelSerializer):
             instance.amounts.all(), many=True
         ).data
         return representation
+
+    def validate(self, data):
+        ingredients = data.get('amounts')
+        tags = data.get('tags')
+        image = data.get('image')
+        if not ingredients or len(ingredients) == 0:
+            raise serializers.ValidationError({
+                'ingredients': 'Необходимо добавить хотя бы один ингредиент.'
+            })
+        if not tags or len(tags) == 0:
+            raise serializers.ValidationError({
+                'tags': 'Необходимо выбрать хотя бы один тег.'
+            })
+        ingredient_ids = [ingredient['ingredient'].id for ingredient in ingredients]
+        if len(ingredient_ids) != len(set(ingredient_ids)):
+            raise serializers.ValidationError({
+                'ingredients': 'Ингредиенты должны быть уникальными.'
+            })
+        if len(tags) != len(set(tags)):
+            raise serializers.ValidationError({
+                'tags': 'Теги не должны повторяться.'
+            })
+        if not image:
+            raise serializers.ValidationError({
+                'image': 'Это поле обязательно.'
+            })
+        return data
+

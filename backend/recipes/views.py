@@ -1,11 +1,12 @@
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 
-
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.exceptions import PermissionDenied
 
 from recipes.models import Recipe, Ingredient, Tag, Favorite, ShoppingCart
 from recipes.serializers import RecipeSerializer, IngredientSerializer, TagSerializer
@@ -22,10 +23,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
 
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise PermissionDenied('Необходимо войти в систему для создания рецепта.')
         serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -78,8 +81,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def custom_exception_handler(exc, context):
         response = exception_handler(exc, context)
-        # Customize response here if needed
         return response
+
+    @action(detail=True, methods=['get'], url_path='get-link')
+    def get_link(self, request, pk=None):
+        recipe = self.get_object()
+        short_link = self.generate_short_link(recipe)
+        return Response({'short-link': short_link}, status=status.HTTP_200_OK)
+
+    def generate_short_link(self, recipe):
+        return f"https://short.link/{recipe.id}"
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):

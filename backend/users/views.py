@@ -16,6 +16,7 @@ class UserViewSet(DjoserUserViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
+    lookup_field = 'id'
 
     def get_permissions(self):
         if self.action == 'me':
@@ -31,7 +32,7 @@ class UserViewSet(DjoserUserViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-    def subscribe(self, request):
+    def subscribe(self, request, id=None):
         author = self.get_object()
         user = request.user
         if user == author:
@@ -43,7 +44,7 @@ class UserViewSet(DjoserUserViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
-    def unsubscribe(self, request):
+    def unsubscribe(self, request, id=None):
         author = self.get_object()
         user = request.user
         subscription = Subscription.objects.filter(user=user, author=author)
@@ -57,10 +58,10 @@ class UserViewSet(DjoserUserViewSet):
         user = request.user
         subscriptions = Subscription.objects.filter(user=user)
         authors = [subscription.author for subscription in subscriptions]
-        paginator = PageNumberPagination()
-        paginator.page_size = 10
-        result_page = paginator.paginate_queryset(authors, request)
-        serializer = SubscriptionSerializer(result_page, many=True, context={'request': request})
+
+        paginator = CustomPagination()
+        page = paginator.paginate_queryset(authors, request)
+        serializer = SubscriptionSerializer(page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
     @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated], url_path='me/avatar')
