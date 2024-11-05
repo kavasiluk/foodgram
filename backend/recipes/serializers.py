@@ -18,7 +18,10 @@ class TagSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "slug",
-        )  # 'color' - предусматривается заданием, но противоречит тестам постмана. Нужен ли?
+        )
+
+
+# 'color' - предусматривается заданием, но противоречит тестам постмана. Нужен ли?
 
 
 class AmountSerializer(serializers.ModelSerializer):
@@ -26,7 +29,9 @@ class AmountSerializer(serializers.ModelSerializer):
         queryset=Ingredient.objects.all(), source="ingredient"
     )
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit"
+    )
 
     class Meta:
         model = Amount
@@ -37,7 +42,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     author = UserSerializer(read_only=True)
     ingredients = AmountSerializer(many=True, source="amounts")
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True
+    )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -94,12 +101,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         for ingredient_data in ingredients_data:
             ingredient = ingredient_data["ingredient"]
             amount = ingredient_data["amount"]
-            amounts.append(Amount(recipe=recipe, ingredient=ingredient, amount=amount))
+            amounts.append(
+                Amount(recipe=recipe, ingredient=ingredient, amount=amount)
+            )
         Amount.objects.bulk_create(amounts)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["tags"] = TagSerializer(instance.tags.all(), many=True).data
+        representation["tags"] = TagSerializer(
+            instance.tags.all(), many=True
+        ).data
         representation["ingredients"] = AmountSerializer(
             instance.amounts.all(), many=True
         ).data
@@ -117,13 +128,19 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"tags": "Необходимо выбрать хотя бы один тег."}
             )
-        ingredient_ids = [ingredient["ingredient"].id for ingredient in ingredients]
+        ingredient_ids = [
+            ingredient["ingredient"].id for ingredient in ingredients
+        ]
         if len(ingredient_ids) != len(set(ingredient_ids)):
             raise serializers.ValidationError(
                 {"ingredients": "Ингредиенты должны быть уникальными."}
             )
         if len(tags) != len(set(tags)):
-            raise serializers.ValidationError({"tags": "Теги не должны повторяться."})
+            raise serializers.ValidationError(
+                {"tags": "Теги не должны повторяться."}
+            )
         if not image:
-            raise serializers.ValidationError({"image": "Это поле обязательно."})
+            raise serializers.ValidationError(
+                {"image": "Это поле обязательно."}
+            )
         return data

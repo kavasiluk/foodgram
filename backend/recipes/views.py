@@ -9,7 +9,11 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.exceptions import PermissionDenied
 
 from recipes.models import Recipe, Ingredient, Tag, Favorite, ShoppingCart
-from recipes.serializers import RecipeSerializer, IngredientSerializer, TagSerializer
+from recipes.serializers import (
+    RecipeSerializer,
+    IngredientSerializer,
+    TagSerializer,
+)
 from recipes.short_serializers import RecipeShortSerializer
 from recipes.permissions import IsAuthorOrReadOnly
 from recipes.filters import IngredientFilter, RecipeFilter
@@ -30,21 +34,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:
-            raise PermissionDenied("Необходимо войти в систему для создания рецепта.")
+            raise PermissionDenied(
+                "Необходимо войти в систему для создания рецепта."
+            )
         serializer.save(author=self.request.user)
 
     @action(
-        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+        detail=True,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
     )
     def favorite(self, request, pk=None):
         recipe = self.get_object()
         user = request.user
         if Favorite.objects.filter(user=user, recipe=recipe).exists():
             return Response(
-                {"errors": "Рецепт уже в избранном"}, status=status.HTTP_400_BAD_REQUEST
+                {"errors": "Рецепт уже в избранном"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         Favorite.objects.create(user=user, recipe=recipe)
-        serializer = RecipeShortSerializer(recipe, context={"request": request})
+        serializer = RecipeShortSerializer(
+            recipe, context={"request": request}
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @favorite.mapping.delete
@@ -61,7 +72,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+        detail=True,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
     )
     def shopping_cart(self, request, pk=None):
         recipe = self.get_object()
@@ -72,7 +85,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         ShoppingCart.objects.create(user=user, recipe=recipe)
-        serializer = RecipeShortSerializer(recipe, context={"request": request})
+        serializer = RecipeShortSerializer(
+            recipe, context={"request": request}
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @shopping_cart.mapping.delete
@@ -89,13 +104,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+        detail=False,
+        methods=["get"],
+        permission_classes=[permissions.IsAuthenticated],
     )
-    def download_shopping_cart(self, request):
-        user = request.user
+    def download_shopping_cart(self):
         shopping_list = "Your shopping list content here"
         response = HttpResponse(shopping_list, content_type="text/plain")
-        response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
+        response["Content-Disposition"] = (
+            'attachment; filename="shopping_list.txt"'
+        )
         return response
 
     def custom_exception_handler(exc, context):

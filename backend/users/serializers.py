@@ -57,13 +57,17 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
         if request and request.user.is_authenticated:
-            return Subscription.objects.filter(user=request.user, author=obj).exists()
+            return Subscription.objects.filter(
+                user=request.user, author=obj
+            ).exists()
         return False
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     recipes = RecipeShortSerializer(many=True, read_only=True)
-    recipes_count = serializers.IntegerField(source="recipes.count", read_only=True)
+    recipes_count = serializers.IntegerField(
+        source="recipes.count", read_only=True
+    )
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -85,10 +89,14 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        recipes_limit = self.context["request"].query_params.get("recipes_limit")
+        recipes_limit = self.context["request"].query_params.get(
+            "recipes_limit"
+        )
         if recipes_limit:
             recipes_limit = int(recipes_limit)
-            representation["recipes"] = representation["recipes"][:recipes_limit]
+            representation["recipes"] = representation["recipes"][
+                :recipes_limit
+            ]
         return representation
 
 

@@ -19,15 +19,21 @@ class UserAPITestCase(TestCase):
         response = self.client.post(f"/api/users/{self.author.id}/subscribe/")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(
-            Subscription.objects.filter(user=self.user, author=self.author).exists()
+            Subscription.objects.filter(
+                user=self.user, author=self.author
+            ).exists()
         )
 
     def test_unsubscribe(self):
         Subscription.objects.create(user=self.user, author=self.author)
-        response = self.client.delete(f"/api/users/{self.author.id}/subscribe/")
+        response = self.client.delete(
+            f"/api/users/{self.author.id}/subscribe/"
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(
-            Subscription.objects.filter(user=self.user, author=self.author).exists()
+            Subscription.objects.filter(
+                user=self.user, author=self.author
+            ).exists()
         )
 
     def test_subscriptions_list(self):

@@ -21,7 +21,11 @@ class Command(BaseCommand):
                             name=name, measurement_unit=measurement_unit
                         )
                     else:
-                        self.stdout.write(self.style.ERROR(f"Неверная строка: {row}"))
-            self.stdout.write(self.style.SUCCESS("Ингредиенты успешно загружены."))
+                        self.stdout.write(
+                            self.style.ERROR(f"Неверная строка: {row}")
+                        )
+            self.stdout.write(
+                self.style.SUCCESS("Ингредиенты успешно загружены.")
+            )
         except FileNotFoundError:
             self.stdout.write(self.style.ERROR(f"Файл не найден: {file_path}"))

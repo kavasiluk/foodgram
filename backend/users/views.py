@@ -1,12 +1,16 @@
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from djoser.views import UserViewSet as DjoserUserViewSet
 
 
 from users.models import CustomUser, Subscription
-from users.serializers import UserSerializer, SubscriptionSerializer, AvatarSerializer
+from users.serializers import (
+    UserSerializer,
+    SubscriptionSerializer,
+    AvatarSerializer,
+)
 from foodgram.pagination import CustomPagination
 
 
@@ -25,14 +29,18 @@ class UserViewSet(DjoserUserViewSet):
         serializer.save()
 
     @action(
-        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+        detail=False,
+        methods=["get"],
+        permission_classes=[permissions.IsAuthenticated],
     )
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
     @action(
-        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+        detail=True,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
     )
     def subscribe(self, request, id=None):
         author = self.get_object()
@@ -48,7 +56,9 @@ class UserViewSet(DjoserUserViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         Subscription.objects.create(user=user, author=author)
-        serializer = SubscriptionSerializer(author, context={"request": request})
+        serializer = SubscriptionSerializer(
+            author, context={"request": request}
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
@@ -65,7 +75,9 @@ class UserViewSet(DjoserUserViewSet):
         )
 
     @action(
-        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+        detail=False,
+        methods=["get"],
+        permission_classes=[permissions.IsAuthenticated],
     )
     def subscriptions(self, request):
         user = request.user
