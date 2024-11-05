@@ -13,7 +13,8 @@ class Command(BaseCommand):
         try:
             with open(file_path, encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
-                #                Ingredient.objects.all().delete()  # Опционально: удаляем существующие данные
+                #                Ingredient.objects.all().delete()
+                # Опционально: удаляем существующие данные
                 for row in reader:
                     if len(row) == 2:
                         name, measurement_unit = row
