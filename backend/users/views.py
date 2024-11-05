@@ -14,31 +14,41 @@ class UserViewSet(DjoserUserViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
-    lookup_field = 'id'
+    lookup_field = "id"
 
     def get_permissions(self):
-        if self.action == 'me':
+        if self.action == "me":
             return (IsAuthenticated(),)
         return super().get_permissions()
 
     def perform_update(self, serializer):
         serializer.save()
 
-    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    @action(
+        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+    )
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(
+        detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated]
+    )
     def subscribe(self, request, id=None):
         author = self.get_object()
         user = request.user
         if user == author:
-            return Response({'errors': 'Нельзя подписаться на самого себя'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"errors": "Нельзя подписаться на самого себя"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if Subscription.objects.filter(user=user, author=author).exists():
-            return Response({'errors': 'Вы уже подписаны на этого автора'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"errors": "Вы уже подписаны на этого автора"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         Subscription.objects.create(user=user, author=author)
-        serializer = SubscriptionSerializer(author, context={'request': request})
+        serializer = SubscriptionSerializer(author, context={"request": request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
@@ -49,9 +59,14 @@ class UserViewSet(DjoserUserViewSet):
         if subscription.exists():
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response({'errors': 'Вы не подписаны на этого автора'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"errors": "Вы не подписаны на этого автора"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    @action(
+        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+    )
     def subscriptions(self, request):
         user = request.user
         subscriptions = Subscription.objects.filter(user=user)
@@ -59,10 +74,17 @@ class UserViewSet(DjoserUserViewSet):
 
         paginator = CustomPagination()
         page = paginator.paginate_queryset(authors, request)
-        serializer = SubscriptionSerializer(page, many=True, context={'request': request})
+        serializer = SubscriptionSerializer(
+            page, many=True, context={"request": request}
+        )
         return paginator.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated], url_path='me/avatar')
+    @action(
+        detail=False,
+        methods=["put"],
+        permission_classes=[IsAuthenticated],
+        url_path="me/avatar",
+    )
     def avatar(self, request):
         user = request.user
         serializer = AvatarSerializer(user, data=request.data)

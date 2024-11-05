@@ -10,22 +10,22 @@ class RecipeAPITestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = CustomUser.objects.create_user(
-            email='test@example.com', password='testpassword'
+            email="test@example.com", password="testpassword"
         )
         self.client.force_authenticate(user=self.user)
 
     def test_create_recipe(self):
-        ingredient = Ingredient.objects.create(name='Sugar', measurement_unit='g')
-        tag = Tag.objects.create(name='Dessert', color='#FF0000', slug='dessert')
+        ingredient = Ingredient.objects.create(name="Sugar", measurement_unit="g")
+        tag = Tag.objects.create(name="Dessert", color="#FF0000", slug="dessert")
         data = {
-            'name': 'Test Recipe',
-            'text': 'Test description',
-            'cooking_time': 10,
-            'ingredients': [{'id': ingredient.id, 'amount': 100}],
-            'tags': [tag.id],
-            'image': None
+            "name": "Test Recipe",
+            "text": "Test description",
+            "cooking_time": 10,
+            "ingredients": [{"id": ingredient.id, "amount": 100}],
+            "tags": [tag.id],
+            "image": None,
         }
-        response = self.client.post(reverse('recipes-list'), data, format='json')
+        response = self.client.post(reverse("recipes-list"), data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Recipe.objects.count(), 1)
-        self.assertEqual(Recipe.objects.get().name, 'Test Recipe')
+        self.assertEqual(Recipe.objects.get().name, "Test Recipe")

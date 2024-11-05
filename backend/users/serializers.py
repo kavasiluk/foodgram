@@ -17,21 +17,27 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'email', 'username', 'first_name',
-            'last_name', 'password', 'is_subscribed', 'avatar',
+            "id",
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "password",
+            "is_subscribed",
+            "avatar",
         )
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         print(validated_data)
-        password = validated_data.pop('password')
-        avatar = validated_data.pop('avatar', None)
+        password = validated_data.pop("password")
+        avatar = validated_data.pop("avatar", None)
         user = User(
-            email=validated_data['email'],
-            username=validated_data['username'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', ''),
-            **validated_data
+            email=validated_data["email"],
+            username=validated_data["username"],
+            first_name=validated_data.get("first_name", ""),
+            last_name=validated_data.get("last_name", ""),
+            **validated_data,
         )
         user.set_password(password)
         if avatar:
@@ -40,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        avatar = validated_data.pop('avatar', None)
+        avatar = validated_data.pop("avatar", None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         if avatar:
@@ -49,7 +55,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if request and request.user.is_authenticated:
             return Subscription.objects.filter(user=request.user, author=obj).exists()
         return False
@@ -57,17 +63,21 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     recipes = RecipeShortSerializer(many=True, read_only=True)
-    recipes_count = serializers.IntegerField(
-        source='recipes.count',
-        read_only=True
-    )
+    recipes_count = serializers.IntegerField(source="recipes.count", read_only=True)
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
-            'id', 'email', 'username', 'first_name',
-            'last_name', 'is_subscribed', 'recipes', 'recipes_count', 'avatar'
+            "id",
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
+            "avatar",
         )
 
     def get_is_subscribed(self, obj):
@@ -75,10 +85,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        recipes_limit = self.context['request'].query_params.get('recipes_limit')
+        recipes_limit = self.context["request"].query_params.get("recipes_limit")
         if recipes_limit:
             recipes_limit = int(recipes_limit)
-            representation['recipes'] = representation['recipes'][:recipes_limit]
+            representation["recipes"] = representation["recipes"][:recipes_limit]
         return representation
 
 
@@ -87,5 +97,4 @@ class AvatarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('avatar',)
-
+        fields = ("avatar",)
