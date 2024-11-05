@@ -21,7 +21,7 @@ class TagSerializer(serializers.ModelSerializer):
         )
 
 
-# 'color' - предусматривается заданием, но противоречит тестам постмана. Нужен ли?
+# 'color' - есть в задании, но нет у постмана. Нужно ли?
 
 
 class AmountSerializer(serializers.ModelSerializer):
