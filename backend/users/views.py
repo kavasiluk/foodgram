@@ -1,7 +1,6 @@
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from djoser.views import UserViewSet as DjoserUserViewSet
 
@@ -9,7 +8,6 @@ from djoser.views import UserViewSet as DjoserUserViewSet
 from users.models import CustomUser, Subscription
 from users.serializers import UserSerializer, SubscriptionSerializer, AvatarSerializer
 from foodgram.pagination import CustomPagination
-from recipes.permissions import IsAdminOrSelf
 
 
 class UserViewSet(DjoserUserViewSet):

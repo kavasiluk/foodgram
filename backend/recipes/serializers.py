@@ -14,7 +14,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'slug') #'color',
+        fields = ('id', 'name', 'slug') #'color' - предусматривается заданием, но противоречит тестам постмана. Нужен ли?
 
 
 class AmountSerializer(serializers.ModelSerializer):

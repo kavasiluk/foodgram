@@ -6,6 +6,7 @@ admin.site.register(Ingredient)
 admin.site.register(Tag)
 admin.site.register(Amount)
 
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'cooking_time')

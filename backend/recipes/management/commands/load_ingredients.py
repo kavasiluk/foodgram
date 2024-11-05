@@ -4,6 +4,7 @@ from recipes.models import Ingredient
 from django.conf import settings
 import os
 
+
 class Command(BaseCommand):
     help = 'Загружает ингредиенты из CSV-файла'
 

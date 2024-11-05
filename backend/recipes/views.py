@@ -25,7 +25,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
     permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
 
-
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:
             raise PermissionDenied('Необходимо войти в систему для создания рецепта.')
