@@ -42,7 +42,7 @@ class UserViewSet(DjoserUserViewSet):
     def subscribe(self, request, id=None):
         author = self.get_object()
         user = request.user
-        data = {'user': user.id, 'author': author.id}
+        data = {"user": user.id, "author": author.id}
         serializer = SubscriptionCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -71,7 +71,10 @@ class UserViewSet(DjoserUserViewSet):
     )
     def subscriptions(self, request):
         user = request.user
-        authors = [subscription.author for subscription in user.subscriptions.select_related('author')]
+        authors = [
+            subscription.author
+            for subscription in user.subscriptions.select_related("author")
+        ]
         paginator = CustomPagination()
         page = paginator.paginate_queryset(authors, request)
         serializer = SubscriptionSerializer(

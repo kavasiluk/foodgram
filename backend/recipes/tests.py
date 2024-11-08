@@ -27,7 +27,9 @@ class RecipeAPITestCase(TestCase):
             "name": "Test Recipe",
             "text": "Test description",
             "cooking_time": RECIPE_COOKING_TIME,
-            "ingredients": [{"id": ingredient.id, "amount": RECIPE_INGREDIENT_AMOUNT}],
+            "ingredients": [
+                {"id": ingredient.id, "amount": RECIPE_INGREDIENT_AMOUNT}
+            ],
             "tags": [tag.id],
             "image": None,
         }

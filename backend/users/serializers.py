@@ -55,7 +55,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def get_is_subscribed(self, obj):
-        request = self.context['request']
+        request = self.context["request"]
         user = request.user
         if user.is_authenticated:
             return user.subscriptions.filter(author=obj).exists()
@@ -65,15 +65,19 @@ class UserSerializer(serializers.ModelSerializer):
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
-        fields = ('user', 'author')
+        fields = ("user", "author")
 
     def validate(self, data):
-        user = data['user']
-        author = data['author']
+        user = data["user"]
+        author = data["author"]
         if user == author:
-            raise serializers.ValidationError("Нельзя подписаться на самого себя.")
+            raise serializers.ValidationError(
+                "Нельзя подписаться на самого себя."
+            )
         if user.subscriptions.filter(author=author).exists():
-            raise serializers.ValidationError("Вы уже подписаны на этого автора.")
+            raise serializers.ValidationError(
+                "Вы уже подписаны на этого автора."
+            )
         return data
 
 

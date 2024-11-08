@@ -1,5 +1,9 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.core.validators import (
+    MinValueValidator,
+    MaxValueValidator,
+    RegexValidator,
+)
 from django.contrib.auth import get_user_model
 
 from .constants import (
@@ -19,16 +23,15 @@ from .constants import (
 User = get_user_model()
 
 
-
 class Ingredient(models.Model):
     name = models.CharField(
         verbose_name="Название ингредиента",
         max_length=MAX_LENGTH_INGREDIENT_NAME,
-        db_index=True
+        db_index=True,
     )
     measurement_unit = models.CharField(
         verbose_name="Единица измерения",
-        max_length=MAX_LENGTH_MEASUREMENT_UNIT
+        max_length=MAX_LENGTH_MEASUREMENT_UNIT,
     )
 
     class Meta:
@@ -39,11 +42,12 @@ class Ingredient(models.Model):
     def __str__(self):
         return f"{self.name} ({self.measurement_unit})"
 
+
 class Tag(models.Model):
     name = models.CharField(
         verbose_name="Название тега",
         max_length=MAX_LENGTH_TAG_NAME,
-        unique=True
+        unique=True,
     )
     color = models.CharField(
         verbose_name="Цвет",
@@ -52,14 +56,12 @@ class Tag(models.Model):
         validators=[
             RegexValidator(
                 regex=HEX_COLOR_CODE_REGEX,
-                message="Введите корректный HEX-код цвета"
+                message="Введите корректный HEX-код цвета",
             )
         ],
     )
     slug = models.SlugField(
-        verbose_name="Уникальный слаг",
-        max_length=MAX_LENGTH_SLUG,
-        unique=True
+        verbose_name="Уникальный слаг", max_length=MAX_LENGTH_SLUG, unique=True
     )
 
     class Meta:
@@ -69,6 +71,7 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+
 class Recipe(models.Model):
     author = models.ForeignKey(
         User,
@@ -77,13 +80,9 @@ class Recipe(models.Model):
         verbose_name="Автор",
     )
     name = models.CharField(
-        max_length=MAX_LENGTH_RECIPE_NAME,
-        verbose_name="Название"
+        max_length=MAX_LENGTH_RECIPE_NAME, verbose_name="Название"
     )
-    image = models.ImageField(
-        upload_to="recipes/",
-        verbose_name="Изображение"
-    )
+    image = models.ImageField(upload_to="recipes/", verbose_name="Изображение")
     text = models.TextField(verbose_name="Описание")
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -92,20 +91,17 @@ class Recipe(models.Model):
         verbose_name="Ингредиенты",
     )
     tags = models.ManyToManyField(
-        Tag,
-        related_name="recipes",
-        verbose_name="Теги"
+        Tag, related_name="recipes", verbose_name="Теги"
     )
     cooking_time = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(MIN_COOKING_TIME),
-            MaxValueValidator(MAX_COOKING_TIME)
+            MaxValueValidator(MAX_COOKING_TIME),
         ],
         verbose_name="Время приготовления (в минутах)",
     )
     pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Дата публикации"
+        auto_now_add=True, verbose_name="Дата публикации"
     )
 
     class Meta:
@@ -115,6 +111,7 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Amount(models.Model):
     recipe = models.ForeignKey(
@@ -132,9 +129,9 @@ class Amount(models.Model):
     amount = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(MIN_INGREDIENT_AMOUNT),
-            MaxValueValidator(MAX_INGREDIENT_AMOUNT)
+            MaxValueValidator(MAX_INGREDIENT_AMOUNT),
         ],
-        verbose_name="Количество"
+        verbose_name="Количество",
     )
 
     class Meta:
@@ -144,6 +141,7 @@ class Amount(models.Model):
 
     def __str__(self):
         return f"{self.ingredient.name} - {self.amount}"
+
 
 class Favorite(models.Model):
     user = models.ForeignKey(
@@ -166,6 +164,7 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f"{self.user.username} -> {self.recipe.name}"
+
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(

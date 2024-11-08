@@ -7,7 +7,7 @@ MAX_LENGTH_SLUG = 50
 MAX_LENGTH_RECIPE_NAME = 200
 
 # Регулярные выражения
-HEX_COLOR_CODE_REGEX = r'^#([A-Fa-f0-9]{6})$'
+HEX_COLOR_CODE_REGEX = r"^#([A-Fa-f0-9]{6})$"
 
 # Значения для валидации
 MIN_COOKING_TIME = 1

@@ -6,7 +6,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.exceptions import PermissionDenied
 
 from recipes.models import Recipe, Ingredient, Tag, Favorite, ShoppingCart
 from recipes.serializers import (
