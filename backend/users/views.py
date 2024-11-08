@@ -4,11 +4,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from djoser.views import UserViewSet as DjoserUserViewSet
 
-
-from users.models import CustomUser, Subscription
+from users.models import CustomUser
 from users.serializers import (
     UserSerializer,
     SubscriptionSerializer,
+    SubscriptionCreateSerializer,
     AvatarSerializer,
 )
 from foodgram.pagination import CustomPagination
@@ -24,9 +24,6 @@ class UserViewSet(DjoserUserViewSet):
         if self.action == "me":
             return (IsAuthenticated(),)
         return super().get_permissions()
-
-    def perform_update(self, serializer):
-        serializer.save()
 
     @action(
         detail=False,
@@ -45,27 +42,20 @@ class UserViewSet(DjoserUserViewSet):
     def subscribe(self, request, id=None):
         author = self.get_object()
         user = request.user
-        if user == author:
-            return Response(
-                {"errors": "Нельзя подписаться на самого себя"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if Subscription.objects.filter(user=user, author=author).exists():
-            return Response(
-                {"errors": "Вы уже подписаны на этого автора"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        Subscription.objects.create(user=user, author=author)
-        serializer = SubscriptionSerializer(
+        data = {'user': user.id, 'author': author.id}
+        serializer = SubscriptionCreateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        output_serializer = SubscriptionSerializer(
             author, context={"request": request}
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, id=None):
         author = self.get_object()
         user = request.user
-        subscription = Subscription.objects.filter(user=user, author=author)
+        subscription = user.subscriptions.filter(author=author)
         if subscription.exists():
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -81,9 +71,7 @@ class UserViewSet(DjoserUserViewSet):
     )
     def subscriptions(self, request):
         user = request.user
-        subscriptions = Subscription.objects.filter(user=user)
-        authors = [subscription.author for subscription in subscriptions]
-
+        authors = [subscription.author for subscription in user.subscriptions.select_related('author')]
         paginator = CustomPagination()
         page = paginator.paginate_queryset(authors, request)
         serializer = SubscriptionSerializer(
@@ -100,10 +88,9 @@ class UserViewSet(DjoserUserViewSet):
     def avatar(self, request):
         user = request.user
         serializer = AvatarSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @avatar.mapping.delete
     def delete_avatar(self, request):

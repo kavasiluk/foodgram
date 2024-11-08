@@ -2,7 +2,9 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
+
 from recipes.models import Ingredient, Tag, Recipe
+from recipes.constants import RECIPE_COOKING_TIME, RECIPE_INGREDIENT_AMOUNT
 from users.models import CustomUser
 
 
@@ -24,8 +26,8 @@ class RecipeAPITestCase(TestCase):
         data = {
             "name": "Test Recipe",
             "text": "Test description",
-            "cooking_time": 10,
-            "ingredients": [{"id": ingredient.id, "amount": 100}],
+            "cooking_time": RECIPE_COOKING_TIME,
+            "ingredients": [{"id": ingredient.id, "amount": RECIPE_INGREDIENT_AMOUNT}],
             "tags": [tag.id],
             "image": None,
         }

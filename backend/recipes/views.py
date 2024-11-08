@@ -33,10 +33,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        if not self.request.user.is_authenticated:
-            raise PermissionDenied(
-                "Необходимо войти в систему для создания рецепта."
-            )
         serializer.save(author=self.request.user)
 
     @action(
@@ -47,7 +43,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk=None):
         recipe = self.get_object()
         user = request.user
-        if Favorite.objects.filter(user=user, recipe=recipe).exists():
+        if user.favorites.filter(recipe=recipe).exists():
             return Response(
                 {"errors": "Рецепт уже в избранном"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -62,7 +58,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def delete_favorite(self, request, pk=None):
         recipe = self.get_object()
         user = request.user
-        favorite = Favorite.objects.filter(user=user, recipe=recipe)
+        favorite = user.favorites.filter(recipe=recipe)
         if favorite.exists():
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -79,7 +75,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         recipe = self.get_object()
         user = request.user
-        if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+        if user.shopping_cart.filter(recipe=recipe).exists():
             return Response(
                 {"errors": "Рецепт уже в корзине покупок"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -94,7 +90,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def delete_shopping_cart(self, request, pk=None):
         recipe = self.get_object()
         user = request.user
-        cart_item = ShoppingCart.objects.filter(user=user, recipe=recipe)
+        cart_item = user.shopping_cart.filter(recipe=recipe)
         if cart_item.exists():
             cart_item.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
