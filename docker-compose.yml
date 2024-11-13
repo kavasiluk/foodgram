@@ -47,6 +47,15 @@ services:
       - media_volume:/app/media/
       - ./frontend/build:/usr/share/nginx/html
       - ./docs/:/usr/share/nginx/html/api/docs/
+      - certbot_www:/var/www/certbot
+      - certbot_etc:/etc/letsencrypt
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_etc:/etc/letsencrypt
 
     depends_on:
       - frontend
@@ -57,3 +66,5 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+  certbot_www:
+  certbot_etc:
