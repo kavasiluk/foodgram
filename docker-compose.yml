@@ -62,6 +62,8 @@ services:
 
 volumes:
   postgres_data:
+    external: true
+    name: foodgram_postgres_data
   static_volume:
   media_volume:
   certbot_www:
