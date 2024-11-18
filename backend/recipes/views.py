@@ -8,7 +8,14 @@ from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from recipes.models import Recipe, Ingredient, Tag, Favorite, ShoppingCart, Amount
+from recipes.models import (
+    Recipe,
+    Ingredient,
+    Tag,
+    Favorite,
+    ShoppingCart,
+    Amount,
+)
 from recipes.serializers import (
     RecipeSerializer,
     IngredientSerializer,
@@ -106,26 +113,32 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         user = request.user
-        shopping_cart_items = ShoppingCart.objects.filter(user=user).values_list('recipe', flat=True)
+        shopping_cart_items = ShoppingCart.objects.filter(
+            user=user
+        ).values_list("recipe", flat=True)
         if not shopping_cart_items.exists():
-            return Response({'error': 'Ваша корзина покупок пуста.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Ваша корзина покупок пуста."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        ingredients = Amount.objects.filter(
-            recipe__in=shopping_cart_items
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(total_amount=Sum('amount'))
+        ingredients = (
+            Amount.objects.filter(recipe__in=shopping_cart_items)
+            .values("ingredient__name", "ingredient__measurement_unit")
+            .annotate(total_amount=Sum("amount"))
+        )
 
-        shopping_list = ''
+        shopping_list = ""
         for ingredient in ingredients:
-            name = ingredient['ingredient__name']
-            measurement_unit = ingredient['ingredient__measurement_unit']
-            amount = ingredient['total_amount']
-            shopping_list += f'{name} ({measurement_unit}) - {amount}\n'
+            name = ingredient["ingredient__name"]
+            measurement_unit = ingredient["ingredient__measurement_unit"]
+            amount = ingredient["total_amount"]
+            shopping_list += f"{name} ({measurement_unit}) - {amount}\n"
 
         response = HttpResponse(shopping_list, content_type="text/plain")
-        response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
+        response["Content-Disposition"] = (
+            'attachment; filename="shopping_list.txt"'
+        )
         return response
 
     def custom_exception_handler(exc, context):
