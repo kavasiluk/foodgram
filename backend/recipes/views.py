@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, permissions, status
@@ -7,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from recipes.models import Recipe, Ingredient, Tag, Favorite, ShoppingCart
+from recipes.models import Recipe, Ingredient, Tag, Favorite, ShoppingCart, Amount
 from recipes.serializers import (
     RecipeSerializer,
     IngredientSerializer,
@@ -103,30 +104,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get"],
         permission_classes=[permissions.IsAuthenticated],
     )
-    @action(
-        detail=False,
-        methods=["get"],
-        permission_classes=[permissions.IsAuthenticated],
-    )
     def download_shopping_cart(self, request):
         user = request.user
-        shopping_cart_items = ShoppingCart.objects.filter(user=user)
-        ingredients = {}
+        shopping_cart_items = ShoppingCart.objects.filter(user=user).values_list('recipe', flat=True)
+        if not shopping_cart_items.exists():
+            return Response({'error': 'Ваша корзина покупок пуста.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        for item in shopping_cart_items:
-            recipe = item.recipe
-            for ingredient in recipe.ingredients.all():
-                name = ingredient.name
-                measurement_unit = ingredient.measurement_unit
-                amount = ingredient.amount
-                key = (name, measurement_unit)
-                if key in ingredients:
-                    ingredients[key] += amount
-                else:
-                    ingredients[key] = amount
+        ingredients = Amount.objects.filter(
+            recipe__in=shopping_cart_items
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(total_amount=Sum('amount'))
 
         shopping_list = ''
-        for (name, measurement_unit), amount in ingredients.items():
+        for ingredient in ingredients:
+            name = ingredient['ingredient__name']
+            measurement_unit = ingredient['ingredient__measurement_unit']
+            amount = ingredient['total_amount']
             shopping_list += f'{name} ({measurement_unit}) - {amount}\n'
 
         response = HttpResponse(shopping_list, content_type="text/plain")
