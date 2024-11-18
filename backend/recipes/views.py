@@ -103,12 +103,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["get"],
         permission_classes=[permissions.IsAuthenticated],
     )
-    def download_shopping_cart(self):
-        shopping_list = "Your shopping list content here"
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def download_shopping_cart(self, request):
+        user = request.user
+        shopping_cart_items = ShoppingCart.objects.filter(user=user)
+        ingredients = {}
+
+        for item in shopping_cart_items:
+            recipe = item.recipe
+            for ingredient in recipe.ingredients.all():
+                name = ingredient.name
+                measurement_unit = ingredient.measurement_unit
+                amount = ingredient.amount
+                key = (name, measurement_unit)
+                if key in ingredients:
+                    ingredients[key] += amount
+                else:
+                    ingredients[key] = amount
+
+        shopping_list = ''
+        for (name, measurement_unit), amount in ingredients.items():
+            shopping_list += f'{name} ({measurement_unit}) - {amount}\n'
+
         response = HttpResponse(shopping_list, content_type="text/plain")
-        response["Content-Disposition"] = (
-            'attachment; filename="shopping_list.txt"'
-        )
+        response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
         return response
 
     def custom_exception_handler(exc, context):
