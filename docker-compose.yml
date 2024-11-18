@@ -7,8 +7,6 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    ports:
-      - '5432:5432'
 
   backend:
     image: vasiluk23/foodgram_backend:latest
@@ -62,8 +60,6 @@ services:
 
 volumes:
   postgres_data:
-    external: true
-    name: foodgram_postgres_data
   static_volume:
   media_volume:
   certbot_www:
