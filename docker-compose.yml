@@ -23,7 +23,6 @@ services:
   frontend:
     image: vasiluk23/foodgram_frontend:latest
     container_name: foodgram-frontend
-    restart: always
     command: sh -c "npm run build && cp -r build/* /usr/share/nginx/html/"
     volumes:
       - ./frontend/build:/usr/share/nginx/html
